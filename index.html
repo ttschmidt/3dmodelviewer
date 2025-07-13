@@ -7,22 +7,32 @@
     <style>
       body {
         margin: 0;
-        background: #000000; /* black background */
+        background: #000000;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
       }
+
       model-viewer {
-        width: 90vw;
-        height: 90vh;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        aspect-ratio: 1;
+      }
+
+      @media (orientation: landscape) {
+        model-viewer {
+          aspect-ratio: auto;
+          max-height: 100vh;
+        }
       }
     </style>
   </head>
   <body>
     <model-viewer 
       src="sacrum.glb" 
-      alt="3D model of sacrum" 
+      alt="3D model of sacrum"
       auto-rotate 
       camera-controls 
       environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
