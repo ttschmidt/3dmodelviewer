@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Sacrum 3D Model Viewer - Dim Lighting</title>
+    <title>Sacrum 3D Model Viewer - Test Update</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
       body {
         margin: 0;
-        background: #111;
+        background: #ff0000; /* bright red background */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -25,9 +25,10 @@
       alt="3D model of sacrum" 
       auto-rotate 
       camera-controls 
+      auto-rotate-speed="5"  <!-- faster spin -->
       environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
       environment-intensity="0.05"
-      background-color="#000000">
+      background-color="#ff0000">
     </model-viewer>
   </body>
 </html>
