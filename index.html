@@ -2,48 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Glass Bunny Viewer Responsive Fix</title>
+  <title>Glass Bunny 3D Viewer</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
+    /* Make the viewer fill the entire viewport */
     html, body {
-      margin: 0; padding: 0;
-      height: 100%;
-      width: 100%;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
+      margin: 0; padding: 0; height: 100%; width: 100%; background: #000;
     }
-
     model-viewer {
+      width: 100%;
+      height: 100%;
       background-color: #000;
-      width: 85vw;
-      max-width: 600px;
-      height: 85vw; /* force square box */
-      max-height: 600px;
-      object-fit: contain;
-      /* remove aspect-ratio for better compatibility */
-    }
-
-    @media (min-width: 800px) {
-      model-viewer {
-        width: auto;
-        height: 80vh;
-        max-height: 800px;
-        max-width: none;
-      }
     }
   </style>
 </head>
 <body>
   <model-viewer
     src="glass_bunny.glb"
-    alt="3D model of glass bunny"
+    alt="Glass Bunny"
     auto-rotate
     camera-controls
     environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-    environment-intensity="1.5"
+    environment-intensity="1"
+    background-color="#000"
   ></model-viewer>
 </body>
 </html>
