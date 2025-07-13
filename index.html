@@ -2,27 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Glass Bunny Viewer Fixed</title>
+  <title>Glass Bunny Viewer Responsive</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
       margin: 0; padding: 0;
       height: 100%;
       width: 100%;
-      background: #000000;
+      background: #000;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
     }
+
     model-viewer {
+      background-color: #000;
+      object-fit: contain;
+      aspect-ratio: 1 / 1;
       width: 90vw;
       max-width: 600px;
-      aspect-ratio: 1 / 1;
-      object-fit: contain;
-      background-color: #000000;
-      --webkit-user-select: none;
-      user-select: none;
+      height: auto; /* Let height auto adjust based on width & aspect ratio */
+    }
+
+    /* Desktop tweaks */
+    @media (min-width: 800px) {
+      model-viewer {
+        width: auto;        /* Let width adjust */
+        max-width: none;
+        height: 80vh;       /* Make viewer fill 80% of viewport height */
+        max-height: 800px;  /* Optional cap */
+      }
     }
   </style>
 </head>
