@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Penguin Viewer</title>
+  <title>Static Penguin Viewer</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
@@ -13,11 +13,8 @@
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
     import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/controls/OrbitControls.js';
-    import * as dat from 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.9/build/dat.gui.module.js';
 
-    let scene, camera, renderer, mixer;
-    let model, actions = {}, activeAction;
-    const clock = new THREE.Clock();
+    let scene, camera, renderer, model;
 
     init();
     animate();
@@ -35,65 +32,26 @@
 
       const controls = new OrbitControls(camera, renderer.domElement);
 
-      // Lights
       const light = new THREE.DirectionalLight(0xffffff, 1);
       light.position.set(5, 10, 7.5);
       scene.add(light);
 
       const loader = new GLTFLoader();
-
-      // Load Penguin
       loader.load(
         'african_penguin_spheniscus_demersus_low_poly.glb',
         (gltf) => {
           model = gltf.scene;
           scene.add(model);
-
-          // Setup animations inside here — where gltf is available!
-          mixer = new THREE.AnimationMixer(model);
-
-          gltf.animations.forEach((clip) => {
-            const action = mixer.clipAction(clip);
-            actions[clip.name] = action;
-          });
-
-          // Play the first animation by default
-          const firstAnimation = Object.keys(actions)[0];
-          if (firstAnimation) {
-            activeAction = actions[firstAnimation];
-            activeAction.play();
-          }
-
-          // Setup GUI or anything else animation-related here
-          const gui = new dat.GUI();
-          const animFolder = gui.addFolder('Animations');
-          Object.keys(actions).forEach((name) => {
-            animFolder.add({ play: () => switchAnimation(name) }, 'play').name(name);
-          });
-          animFolder.open();
         },
         undefined,
         (error) => {
-          console.error('Failed to load the model:', error);
+          console.error('Error loading model:', error);
         }
       );
     }
 
-    function switchAnimation(name) {
-      if (activeAction) {
-        activeAction.fadeOut(0.2);
-      }
-      const newAction = actions[name];
-      if (newAction) {
-        newAction.reset().fadeIn(0.2).play();
-        activeAction = newAction;
-      }
-    }
-
     function animate() {
       requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      if (mixer) mixer.update(delta);
       renderer.render(scene, camera);
     }
 
