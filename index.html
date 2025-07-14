@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Penguin Viewer with Animation Controls</title>
+  <title>Penguin Viewer with Floating Controls</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
@@ -16,15 +16,15 @@
     model-viewer {
       width: 100%;
       max-width: 900px;
-      height: 85vh;             /* fill 85% of viewport height */
+      height: 85vh;             /* default height */
       max-height: 900px;
       background-color: #000;
-      aspect-ratio: auto 16 / 9; /* maintain ratio, but let height control */
+      aspect-ratio: auto 16 / 9;
       object-fit: contain;
     }
 
     #controls {
-      height: 10vh;              /* fixed height for buttons container */
+      height: 10vh;              /* default controls container height */
       min-height: 60px;
       width: 100%;
       max-width: 900px;
@@ -34,6 +34,8 @@
       align-items: center;
       padding: 0 10px;
       box-sizing: border-box;
+      position: relative;        /* normal flow */
+      background: none;
     }
 
     button {
@@ -55,19 +57,27 @@
 
     /* Smaller phones tweaks */
     @media (max-width: 400px) {
+      model-viewer {
+        height: 100vh; /* full screen height */
+      }
+      #controls {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.5);
+        padding: 8px 12px;
+        border-radius: 10px;
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+        width: auto;
+        min-height: unset;
+      }
       button {
         font-size: 1.2rem;
         padding: 12px 20px;
         max-width: 150px;
-      }
-      #controls {
-        height: auto;
-        padding: 10px;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      model-viewer {
-        height: 80vh;
       }
     }
   </style>
@@ -104,3 +114,4 @@
 
 </body>
 </html>
+
