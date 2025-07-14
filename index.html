@@ -12,16 +12,34 @@
     }
     model-viewer {
       width: 100%;
-      height: 80vh;
+      max-width: 600px;       /* max width on bigger screens */
+      height: auto;
+      aspect-ratio: 16 / 9;   /* keep 16:9 ratio */
       background-color: #000;
     }
     #controls {
       margin: 10px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 600px;
     }
     button {
-      font-size: 1.1rem;
-      margin: 0 5px;
-      padding: 6px 12px;
+      font-size: 1.5rem;         /* bigger font size */
+      padding: 14px 24px;        /* bigger touch area */
+      border: none;
+      border-radius: 8px;
+      background-color: #222;
+      color: white;
+      cursor: pointer;
+      flex: 1 1 120px;           /* responsive width */
+      max-width: 200px;
+      transition: background-color 0.3s ease;
+    }
+    button:active {
+      background-color: #555;
     }
   </style>
 </head>
@@ -46,12 +64,10 @@
   <script>
     const viewer = document.querySelector('#viewer');
 
-    // Play animations
     document.getElementById('playBtn').addEventListener('click', () => {
       viewer.play();
     });
 
-    // Pause animations
     document.getElementById('pauseBtn').addEventListener('click', () => {
       viewer.pause();
     });
