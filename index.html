@@ -56,6 +56,7 @@
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
     camera.position.set(2, 2, 4);
+    camera.lookAt(0, 0, 0);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,8 +70,12 @@
     light.position.set(5, 10, 7.5);
     scene.add(light);
 
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambient);
+
     const loader = new GLTFLoader();
     loader.load('african_penguin_spheniscus_demersus_low_poly.glb', (gltf) => {
+      console.log('Model loaded:', gltf);
       model = gltf.scene;
       scene.add(model);
 
@@ -81,17 +86,21 @@
       });
 
       const firstClipName = Object.keys(actions)[0];
-      activeAction = actions[firstClipName];
-      activeAction.play();
+      if(firstClipName) {
+        activeAction = actions[firstClipName];
+        activeAction.play();
+        animationDuration = activeAction.getClip().duration;
+      }
 
-      animationDuration = activeAction.getClip().duration;
-
-      // After model load, enable controls
       document.getElementById('playBtn').disabled = false;
       document.getElementById('pauseBtn').disabled = false;
       document.getElementById('slider').disabled = false;
+    },
+    undefined,
+    (error) => {
+      console.error('Error loading model:', error);
     });
-
+    
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth/window.innerHeight;
       camera.updateProjectionMatrix();
@@ -117,7 +126,6 @@
     slider.value = time / animationDuration;
   }
 
-  // Controls UI
   window.addEventListener('DOMContentLoaded', () => {
     const playBtn = document.getElementById('playBtn');
     const pauseBtn = document.getElementById('pauseBtn');
