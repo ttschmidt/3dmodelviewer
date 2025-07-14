@@ -1,166 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Penguin Viewer with Animation Slider</title>
-<style>
-  body { margin: 0; overflow: hidden; background: #000; }
-  #controls {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    color: white;
-    font-family: sans-serif;
-    z-index: 10;
-  }
-  button {
-    font-size: 1rem;
-    padding: 8px 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    background-color: #222;
-    color: white;
-  }
-  button:hover { background-color: #555; }
-  input[type=range] {
-    width: 200px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Penguin Viewer</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/controls/OrbitControls.js';
 
-<script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
-  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
-  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/controls/OrbitControls.js';
+    let scene, camera, renderer, controls;
 
-  let scene, camera, renderer, mixer, clock;
-  let model, activeAction, animationDuration;
+    init();
+    animate();
 
-  const actions = {};
+    function init() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x202020);
 
-  init();
-  animate();
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(2, 2, 5);
 
-  function init() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdddddd);
-
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
-    camera.position.set(2, 2, 4);
-    camera.lookAt(0, 0, 0);
-
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    clock = new THREE.Clock();
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(5, 10, 7.5);
-    scene.add(light);
-
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambient);
-
-    const loader = new GLTFLoader();
-    loader.load('african_penguin_spheniscus_demersus_low_poly.glb', (gltf) => {
-      console.log('Model loaded:', gltf);
-      model = gltf.scene;
-      scene.add(model);
-
-      mixer = new THREE.AnimationMixer(model);
-      gltf.animations.forEach(clip => {
-        const action = mixer.clipAction(clip);
-        actions[clip.name] = action;
-      });
-
-      const firstClipName = Object.keys(actions)[0];
-      if(firstClipName) {
-        activeAction = actions[firstClipName];
-        activeAction.play();
-        animationDuration = activeAction.getClip().duration;
-      }
-
-      document.getElementById('playBtn').disabled = false;
-      document.getElementById('pauseBtn').disabled = false;
-      document.getElementById('slider').disabled = false;
-    },
-    undefined,
-    (error) => {
-      console.error('Error loading model:', error);
-    });
-    
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
-      camera.updateProjectionMatrix();
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  }
+      document.body.appendChild(renderer.domElement);
 
-  function animate() {
-    requestAnimationFrame(animate);
-    const delta = clock.getDelta();
-    if (mixer && !isUserScrubbing) mixer.update(delta);
-    updateSlider();
-    renderer.render(scene, camera);
-  }
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 1, 0);
+      controls.update();
 
-  let isUserScrubbing = false;
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(5, 10, 7.5);
+      scene.add(light);
 
-  function updateSlider() {
-    if (!activeAction || !animationDuration) return;
-    if (isUserScrubbing) return;
-    const time = activeAction.time % animationDuration;
-    const slider = document.getElementById('slider');
-    slider.value = time / animationDuration;
-  }
+      const ambient = new THREE.AmbientLight(0x404040);
+      scene.add(ambient);
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const playBtn = document.getElementById('playBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const slider = document.getElementById('slider');
+      const loader = new GLTFLoader();
+      loader.load(
+        './african_penguin_spheniscus_demersus_low_poly.glb',
+        (gltf) => {
+          const model = gltf.scene;
+          model.scale.set(1, 1, 1); // optional
+          scene.add(model);
+          console.log('Model loaded');
+        },
+        undefined,
+        (error) => {
+          console.error('Model failed to load:', error);
+        }
+      );
 
-    playBtn.disabled = true;
-    pauseBtn.disabled = true;
-    slider.disabled = true;
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
 
-    playBtn.addEventListener('click', () => {
-      if (activeAction) activeAction.paused = false;
-    });
-    pauseBtn.addEventListener('click', () => {
-      if (activeAction) activeAction.paused = true;
-    });
-
-    slider.addEventListener('input', () => {
-      if (!activeAction || !animationDuration) return;
-      isUserScrubbing = true;
-      const time = slider.value * animationDuration;
-      activeAction.time = time;
-      mixer.update(0);
-    });
-
-    slider.addEventListener('change', () => {
-      isUserScrubbing = false;
-    });
-  });
-</script>
-
-<div id="controls">
-  <button id="playBtn">Play</button>
-  <button id="pauseBtn">Pause</button>
-  <input id="slider" type="range" min="0" max="1" step="0.001" value="0" />
-</div>
-
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+  </script>
 </body>
 </html>
+
