@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Penguin Viewer with AR and Controls</title>
+  <title>Penguin Viewer with AR, Controls, and Slider</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
@@ -24,23 +24,31 @@
     }
 
     #controls {
-      height: 10vh;
-      min-height: 60px;
+      height: auto;
       width: 100%;
       max-width: 900px;
       display: flex;
-      gap: 15px;
+      flex-direction: column;
+      gap: 10px;
       justify-content: center;
       align-items: center;
-      padding: 0 10px;
+      padding: 10px;
       box-sizing: border-box;
-      position: relative;
       background: none;
     }
 
-    button {
-      font-size: 1.5rem;
-      padding: 14px 24px;
+    .buttons {
+      display: flex;
+      width: 100%;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button, #ar-button {
+      font-size: 1.3rem;
+      padding: 12px 20px;
       border: none;
       border-radius: 8px;
       background-color: #222;
@@ -51,33 +59,16 @@
       transition: background-color 0.3s ease;
     }
 
-    button:active {
+    button:active, #ar-button:active {
       background-color: #555;
     }
 
-    /* Style the AR button inside controls */
-    #ar-button {
-      all: unset;
-      cursor: pointer;
-      background-color: #222;
-      color: white;
-      font-size: 1.5rem;
-      padding: 14px 24px;
-      border-radius: 8px;
-      text-align: center;
-      user-select: none;
-      flex: 1 1 120px;
-      max-width: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.3s ease;
-    }
-    #ar-button:active {
-      background-color: #555;
+    #slider {
+      width: 90%;
+      max-width: 800px;
+      margin-top: 5px;
     }
 
-    /* Smaller phones tweaks */
     @media (max-width: 400px) {
       model-viewer {
         height: 100vh;
@@ -90,16 +81,15 @@
         background: rgba(0,0,0,0.5);
         padding: 8px 12px;
         border-radius: 10px;
-        display: flex;
-        gap: 10px;
         z-index: 10;
-        width: auto;
-        min-height: unset;
       }
       button, #ar-button {
-        font-size: 1.2rem;
-        padding: 12px 20px;
+        font-size: 1.1rem;
+        padding: 10px 16px;
         max-width: 150px;
+      }
+      #slider {
+        width: 100%;
       }
     }
   </style>
@@ -112,6 +102,7 @@
     alt="African Penguin"
     camera-controls
     auto-rotate
+    autoplay
     environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
     environment-intensity="1.5"
     background-color="#000"
@@ -121,26 +112,47 @@
   ></model-viewer>
 
   <div id="controls">
-    <button id="playBtn">Play Animation</button>
-    <button id="pauseBtn">Pause Animation</button>
-    <button id="ar-button" title="View in AR">AR</button>
+    <div class="buttons">
+      <button id="playBtn">Play</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="ar-button">AR</button>
+    </div>
+    <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
   </div>
 
   <script>
     const viewer = document.querySelector('#viewer');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const arBtn = document.getElementById('ar-button');
+    const slider = document.getElementById('slider');
 
-    document.getElementById('playBtn').addEventListener('click', () => {
-      viewer.play();
+    let userSliding = false;
+
+    viewer.addEventListener('load', () => {
+      const updateSlider = () => {
+        if (!userSliding && viewer.duration > 0) {
+          slider.value = viewer.currentTime / viewer.duration;
+        }
+        requestAnimationFrame(updateSlider);
+      };
+      updateSlider();
     });
 
-    document.getElementById('pauseBtn').addEventListener('click', () => {
-      viewer.pause();
+    slider.addEventListener('input', () => {
+      userSliding = true;
+      if (viewer.duration > 0) {
+        viewer.currentTime = slider.value * viewer.duration;
+      }
     });
 
-    // Trigger AR session on AR button click
-    document.getElementById('ar-button').addEventListener('click', () => {
-      viewer.activateAR();
+    slider.addEventListener('change', () => {
+      userSliding = false;
     });
+
+    playBtn.addEventListener('click', () => viewer.play());
+    pauseBtn.addEventListener('click', () => viewer.pause());
+    arBtn.addEventListener('click', () => viewer.activateAR());
   </script>
 
 </body>
