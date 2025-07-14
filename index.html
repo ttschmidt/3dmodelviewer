@@ -1,250 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Penguin Viewer with Animation Slider and AR</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%; background: #000;
-      display: flex; flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      overflow: hidden;
-    }
-
-    model-viewer {
-      width: 100%;
-      max-width: 900px;
-      height: 85vh;
-      max-height: 900px;
-      background-color: #000;
-      aspect-ratio: auto 16 / 9;
-      object-fit: contain;
-    }
-
-    #controls {
-      height: 10vh;
-      min-height: 60px;
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      align-items: center;
-      padding: 0 10px;
-      box-sizing: border-box;
-      position: relative;
-      background: none;
-      flex-wrap: wrap;
-    }
-
-    button {
-      font-size: 1.5rem;
-      padding: 14px 24px;
-      border: none;
-      border-radius: 8px;
-      background-color: #222;
-      color: white;
-      cursor: pointer;
-      flex: 1 1 120px;
-      max-width: 200px;
-      transition: background-color 0.3s ease;
-    }
-
-    button:active {
-      background-color: #555;
-    }
-
-    #ar-button {
-      all: unset;
-      cursor: pointer;
-      background-color: #222;
-      color: white;
-      font-size: 1.5rem;
-      padding: 14px 24px;
-      border-radius: 8px;
-      text-align: center;
-      user-select: none;
-      flex: 1 1 120px;
-      max-width: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.3s ease;
-    }
-    #ar-button:active {
-      background-color: #555;
-    }
-
-    /* Slider style */
-    #slider {
-      width: 100%;
-      max-width: 900px;
-      margin-top: 8px;
-      -webkit-appearance: none;
-      height: 10px;
-      border-radius: 5px;
-      background: #444;
-      cursor: pointer;
-    }
-    #slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      background: #eee;
-      cursor: pointer;
-      border-radius: 50%;
-      border: 2px solid #222;
-      margin-top: -5px;
-    }
-    #slider::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: #eee;
-      cursor: pointer;
-      border-radius: 50%;
-      border: 2px solid #222;
-    }
-
-    /* Smaller phones tweaks */
-    @media (max-width: 400px) {
-      model-viewer {
-        height: 100vh;
-      }
-      #controls {
-        position: fixed;
-        bottom: 50px; /* lift above slider */
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.5);
-        padding: 8px 12px;
-        border-radius: 10px;
-        display: flex;
-        gap: 10px;
-        z-index: 10;
-        width: auto;
-        min-height: unset;
-        flex-wrap: nowrap;
-      }
-      button, #ar-button {
-        font-size: 1.2rem;
-        padding: 12px 20px;
-        max-width: 150px;
-      }
-      #slider {
-        position: fixed;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90vw;
-        max-width: 900px;
-        z-index: 11;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Penguin Viewer with Animation Slider</title>
+<style>
+  body { margin: 0; overflow: hidden; background: #000; }
+  #controls {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.6);
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: white;
+    font-family: sans-serif;
+    z-index: 10;
+  }
+  button {
+    font-size: 1rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background-color: #222;
+    color: white;
+  }
+  button:hover { background-color: #555; }
+  input[type=range] {
+    width: 200px;
+  }
+</style>
 </head>
 <body>
 
-  <model-viewer
-    id="viewer"
-    src="african_penguin_spheniscus_demersus_low_poly.glb"
-    alt="African Penguin"
-    camera-controls
-    auto-rotate
-    environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
-    environment-intensity="1.5"
-    background-color="#000"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    ar-scale="auto"
-  ></model-viewer>
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
+  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
+  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/controls/OrbitControls.js';
 
-  <div id="controls">
-    <button id="playBtn">Play Animation</button>
-    <button id="pauseBtn">Pause Animation</button>
-    <button id="ar-button" title="View in AR">AR</button>
-  </div>
+  let scene, camera, renderer, mixer, clock;
+  let model, activeAction, animationDuration;
 
-  <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
+  const actions = {};
 
-  <script>
-    const viewer = document.querySelector('#viewer');
+  init();
+  animate();
+
+  function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xdddddd);
+
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera.position.set(2, 2, 4);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    clock = new THREE.Clock();
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7.5);
+    scene.add(light);
+
+    const loader = new GLTFLoader();
+    loader.load('african_penguin_spheniscus_demersus_low_poly.glb', (gltf) => {
+      model = gltf.scene;
+      scene.add(model);
+
+      mixer = new THREE.AnimationMixer(model);
+      gltf.animations.forEach(clip => {
+        const action = mixer.clipAction(clip);
+        actions[clip.name] = action;
+      });
+
+      const firstClipName = Object.keys(actions)[0];
+      activeAction = actions[firstClipName];
+      activeAction.play();
+
+      animationDuration = activeAction.getClip().duration;
+
+      // After model load, enable controls
+      document.getElementById('playBtn').disabled = false;
+      document.getElementById('pauseBtn').disabled = false;
+      document.getElementById('slider').disabled = false;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    if (mixer && !isUserScrubbing) mixer.update(delta);
+    updateSlider();
+    renderer.render(scene, camera);
+  }
+
+  let isUserScrubbing = false;
+
+  function updateSlider() {
+    if (!activeAction || !animationDuration) return;
+    if (isUserScrubbing) return;
+    const time = activeAction.time % animationDuration;
+    const slider = document.getElementById('slider');
+    slider.value = time / animationDuration;
+  }
+
+  // Controls UI
+  window.addEventListener('DOMContentLoaded', () => {
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
     const slider = document.getElementById('slider');
 
-    let mixer, activeAction, animationDuration = 0;
-    let isUserScrubbing = false;
+    playBtn.disabled = true;
+    pauseBtn.disabled = true;
+    slider.disabled = true;
 
-    // We'll load the model to get access to its animation clips
-    viewer.addEventListener('load', async () => {
-      // Access the THREE.js model behind model-viewer
-      const threeModel = viewer.model;
-      if (!threeModel) {
-        console.warn('No model found in model-viewer.');
-        return;
-      }
-
-      // Get the animations from the GLTF (model-viewer exposes these)
-      const animations = viewer.availableAnimations || [];
-      if (animations.length === 0) {
-        console.warn('No animations found.');
-        return;
-      }
-
-      // Setup AnimationMixer and activeAction
-      mixer = new THREE.AnimationMixer(threeModel);
-      const clip = animations[0]; // Use first animation for simplicity
-      activeAction = mixer.clipAction(clip);
-      activeAction.play();
-      animationDuration = clip.duration;
-
-      // Animate loop to update mixer and slider (only if not scrubbing)
-      function animate() {
-        requestAnimationFrame(animate);
-        if (!isUserScrubbing) {
-          const delta = viewer.clock ? viewer.clock.getDelta() : 0.016; // fallback to ~60fps delta
-          mixer.update(delta);
-          // Update slider position according to animation time
-          const time = activeAction.time % animationDuration;
-          slider.value = time / animationDuration;
-        }
-      }
-      animate();
-    });
-
-    // Play and pause control
-    document.getElementById('playBtn').addEventListener('click', () => {
+    playBtn.addEventListener('click', () => {
       if (activeAction) activeAction.paused = false;
     });
-
-    document.getElementById('pauseBtn').addEventListener('click', () => {
+    pauseBtn.addEventListener('click', () => {
       if (activeAction) activeAction.paused = true;
     });
 
-    // AR button
-    document.getElementById('ar-button').addEventListener('click', () => {
-      viewer.activateAR();
-    });
-
-    // Slider scrubbing logic
     slider.addEventListener('input', () => {
-      if (!activeAction) return;
+      if (!activeAction || !animationDuration) return;
       isUserScrubbing = true;
       const time = slider.value * animationDuration;
       activeAction.time = time;
-      mixer.update(0); // update mixer to show change immediately
+      mixer.update(0);
     });
 
     slider.addEventListener('change', () => {
       isUserScrubbing = false;
     });
-  </script>
+  });
+</script>
 
-  <!-- Include THREE.js for AnimationMixer -->
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
-    window.THREE = THREE; // expose THREE globally for our script above
-  </script>
+<div id="controls">
+  <button id="playBtn">Play</button>
+  <button id="pauseBtn">Pause</button>
+  <input id="slider" type="range" min="0" max="1" step="0.001" value="0" />
+</div>
+
 </body>
 </html>
