@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Penguin Viewer with Floating Controls</title>
+  <title>Penguin Viewer with AR and Controls</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
@@ -16,7 +16,7 @@
     model-viewer {
       width: 100%;
       max-width: 900px;
-      height: 85vh;             /* default height */
+      height: 85vh;
       max-height: 900px;
       background-color: #000;
       aspect-ratio: auto 16 / 9;
@@ -24,7 +24,7 @@
     }
 
     #controls {
-      height: 10vh;              /* default controls container height */
+      height: 10vh;
       min-height: 60px;
       width: 100%;
       max-width: 900px;
@@ -34,7 +34,7 @@
       align-items: center;
       padding: 0 10px;
       box-sizing: border-box;
-      position: relative;        /* normal flow */
+      position: relative;
       background: none;
     }
 
@@ -55,10 +55,32 @@
       background-color: #555;
     }
 
+    /* Style the AR button inside controls */
+    #ar-button {
+      all: unset;
+      cursor: pointer;
+      background-color: #222;
+      color: white;
+      font-size: 1.5rem;
+      padding: 14px 24px;
+      border-radius: 8px;
+      text-align: center;
+      user-select: none;
+      flex: 1 1 120px;
+      max-width: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+    }
+    #ar-button:active {
+      background-color: #555;
+    }
+
     /* Smaller phones tweaks */
     @media (max-width: 400px) {
       model-viewer {
-        height: 100vh; /* full screen height */
+        height: 100vh;
       }
       #controls {
         position: fixed;
@@ -74,7 +96,7 @@
         width: auto;
         min-height: unset;
       }
-      button {
+      button, #ar-button {
         font-size: 1.2rem;
         padding: 12px 20px;
         max-width: 150px;
@@ -93,11 +115,15 @@
     environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr"
     environment-intensity="1.5"
     background-color="#000"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-scale="auto"
   ></model-viewer>
 
   <div id="controls">
     <button id="playBtn">Play Animation</button>
     <button id="pauseBtn">Pause Animation</button>
+    <button id="ar-button" title="View in AR">AR</button>
   </div>
 
   <script>
@@ -109,6 +135,11 @@
 
     document.getElementById('pauseBtn').addEventListener('click', () => {
       viewer.pause();
+    });
+
+    // Trigger AR session on AR button click
+    document.getElementById('ar-button').addEventListener('click', () => {
+      viewer.activateAR();
     });
   </script>
 
