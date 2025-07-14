@@ -40,33 +40,43 @@
       light.position.set(5, 10, 7.5);
       scene.add(light);
 
-      // Load Penguin
       const loader = new GLTFLoader();
-      loader.load('african_penguin_spheniscus_demersus_low_poly.glb', (gltf) => {
-        model = gltf.scene;
-        scene.add(model);
 
-        // Setup animations
-        mixer = new THREE.AnimationMixer(model);
+      // Load Penguin
+      loader.load(
+        'african_penguin_spheniscus_demersus_low_poly.glb',
+        (gltf) => {
+          model = gltf.scene;
+          scene.add(model);
 
-        gltf.animations.forEach((clip) => {
-          const action = mixer.clipAction(clip);
-          actions[clip.name] = action;
-        });
+          // Setup animations inside here — where gltf is available!
+          mixer = new THREE.AnimationMixer(model);
 
-        // Play first animation
-        const firstAnimation = Object.keys(actions)[0];
-        activeAction = actions[firstAnimation];
-        activeAction.play();
+          gltf.animations.forEach((clip) => {
+            const action = mixer.clipAction(clip);
+            actions[clip.name] = action;
+          });
 
-        // Add GUI to switch animations
-        const gui = new dat.GUI();
-        const animFolder = gui.addFolder('Animations');
-        Object.keys(actions).forEach((name) => {
-          animFolder.add({ play: () => switchAnimation(name) }, 'play').name(name);
-        });
-        animFolder.open();
-      });
+          // Play the first animation by default
+          const firstAnimation = Object.keys(actions)[0];
+          if (firstAnimation) {
+            activeAction = actions[firstAnimation];
+            activeAction.play();
+          }
+
+          // Setup GUI or anything else animation-related here
+          const gui = new dat.GUI();
+          const animFolder = gui.addFolder('Animations');
+          Object.keys(actions).forEach((name) => {
+            animFolder.add({ play: () => switchAnimation(name) }, 'play').name(name);
+          });
+          animFolder.open();
+        },
+        undefined,
+        (error) => {
+          console.error('Failed to load the model:', error);
+        }
+      );
     }
 
     function switchAnimation(name) {
@@ -90,6 +100,12 @@
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
+
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
