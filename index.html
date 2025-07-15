@@ -44,6 +44,10 @@
       cursor: pointer;
     }
 
+    button:active, select:active {
+      background-color: #444;
+    }
+
     #slider {
       width: 90%;
       max-width: 800px;
@@ -54,15 +58,13 @@
 
   <select id="modelSelect">
     <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
-    <option value="rabbit.glb">Rabbit</option>
+    <option value="rabbit_rigged.glb">Rabbit</option>
   </select>
 
   <model-viewer
     id="viewer"
-    src="penguin.glb"
+    src="african_penguin_spheniscus_demersus_low_poly.glb"
     alt="3D Model"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
     camera-controls
     autoplay
     auto-rotate
@@ -71,9 +73,7 @@
 
   <div id="controls">
     <div class="buttons">
-      <button id="playBtn">Play</button>
-      <button id="pauseBtn">Pause</button>
-      <button id="arBtn">AR</button>
+      <button id="playPauseBtn">Pause</button>
     </div>
 
     <select id="animationSelect">
@@ -85,14 +85,13 @@
 
   <script>
     const viewer = document.querySelector('#viewer');
-    const playBtn = document.getElementById('playBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const arBtn = document.getElementById('arBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
     const slider = document.getElementById('slider');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
 
     let userSliding = false;
+    let isPlaying = true;
 
     const loadAnimations = () => {
       const animations = viewer.availableAnimations || [];
@@ -106,6 +105,11 @@
         });
         viewer.animationName = animations[0];
         animationSelect.value = animations[0];
+      } else {
+        const option = document.createElement('option');
+        option.textContent = 'No animations';
+        option.disabled = true;
+        animationSelect.appendChild(option);
       }
     };
 
@@ -120,9 +124,16 @@
       loadAnimations();
     });
 
-    playBtn.addEventListener('click', () => viewer.play());
-    pauseBtn.addEventListener('click', () => viewer.pause());
-    arBtn.addEventListener('click', () => viewer.activateAR());
+    playPauseBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        viewer.pause();
+        playPauseBtn.textContent = 'Play';
+      } else {
+        viewer.play();
+        playPauseBtn.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
 
     slider.addEventListener('input', () => {
       userSliding = true;
@@ -130,6 +141,7 @@
         viewer.currentTime = slider.value * viewer.duration;
       }
     });
+
     slider.addEventListener('change', () => {
       userSliding = false;
     });
@@ -137,12 +149,16 @@
     animationSelect.addEventListener('change', () => {
       viewer.animationName = animationSelect.value;
       viewer.play();
+      isPlaying = true;
+      playPauseBtn.textContent = 'Pause';
     });
 
     modelSelect.addEventListener('change', () => {
       viewer.src = modelSelect.value;
-      viewer.poster = ''; // clears old thumbnail if any
+      viewer.poster = ''; // clear any old poster
       viewer.play();
+      isPlaying = true;
+      playPauseBtn.textContent = 'Pause';
     });
 
     syncSlider();
@@ -150,3 +166,4 @@
 
 </body>
 </html>
+
