@@ -18,7 +18,6 @@
       object-fit: contain;
     }
 
-
     #controls {
       width: 100%;
       max-width: 900px;
@@ -46,23 +45,24 @@
       cursor: pointer;
     }
 
-  #modelSelect {
-    margin-top: 25px;   /* existing spacing from top */
-    margin-bottom: 25px; /* new spacing below */
-    }
-
     button:active, select:active {
       background-color: #444;
-      
+    }
+
+    #modelSelect {
+      margin-top: 25px;
+      margin-bottom: 25px;
     }
 
     #slider {
       width: 90%;
       max-width: 800px;
+      border-radius: 5px;
     }
+
     @media (max-width: 1000px) {
       model-viewer {
-        height: 1200px;
+        height: 95vh;
       }
     
       button, select {
@@ -76,76 +76,90 @@
         margin-top: 25px;
       }
     }
+
     /* Make slider purple */
-/* Slider container size adjustments (keep from your existing CSS) */
-#slider {
-  width: 90%;
-  max-width: 800px;
-  border-radius: 5px;
-  /* no white border here */
-}
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
 
-/* Cross-browser styling */
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  background: transparent;
-}
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 8px;
+      background: #9251ff;
+      border-radius: 5px;
+    }
 
-/* Track */
-input[type=range]::-webkit-slider-runnable-track {
-  height: 8px;
-  background: #9251ff;
-  border-radius: 5px;
-}
+    input[type=range]::-moz-range-track {
+      height: 8px;
+      background: #6c009d;
+      border-radius: 5px;
+      box-shadow: 0 0 8px #6c009d;
+    }
 
-input[type=range]::-moz-range-track {
-  height: 8px;
-  background: #6c009d;
-  border-radius: 5px;
-  box-shadow: 0 0 8px #6c009d;
-}
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      background: white;
+      border-radius: 50%;
+      margin-top: -6px;
+      cursor: pointer;
+      box-shadow: 0 0 6px #6c009d;
+    }
 
-/* Thumb */
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 20px;
-  width: 20px;
-  background: white;
-  border-radius: 50%;
-  margin-top: -6px;
-  cursor: pointer;
-  box-shadow: 0 0 6px #6c009d;
-  /* no border */
-}
+    input[type=range]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 6px #6c009d;
+    }
 
-input[type=range]::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 6px #6c009d;
-  /* no border */
-}
+    @media (max-width: 1000px) {
+      input[type=range]::-webkit-slider-thumb {
+        height: 38px;
+        width: 38px;
+        margin-top: -10px;
+      }
+      input[type=range]::-moz-range-thumb {
+        height: 48px;
+        width: 48px;
+      }
+      #slider {
+        width: 100%;
+      }
+    }
 
-/* Bigger slider on mobile */
-@media (max-width: 1000px) {
-  input[type=range]::-webkit-slider-thumb {
-    height: 38px;
-    width: 38px;
-    margin-top: -10px;
-  }
-  input[type=range]::-moz-range-thumb {
-    height: 48px;
-    width: 48px;
-  }
-  #slider {
-    width: 100%;
-  }
-}
+    /* Extra interactive lighting selector style */
+    #extraInteractive {
+      width: 90%;
+      max-width: 900px;
+      margin: 25px auto 50px auto;
+      background-color: #111;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
 
+    #extraInteractive select {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      background-color: #222;
+      color: white;
+      cursor: pointer;
+    }
 
+    #extraInteractive select:focus {
+      outline: none;
+      box-shadow: 0 0 6px #6c009d;
+    }
   </style>
 </head>
 <body>
@@ -153,20 +167,20 @@ input[type=range]::-moz-range-thumb {
   <select id="modelSelect">
     <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
     <option value="rabbit_rigged.glb">Rabbit</option>
-     <option value="elephant.glb">Elephant</option>
+    <option value="elephant.glb">Elephant</option>
   </select>
 
-<model-viewer
-  id="viewer"
-  src="african_penguin_spheniscus_demersus_low_poly.glb"
-  alt="3D Model"
-  ar
-  ar-modes="webxr scene-viewer quick-look"
-  camera-controls
-  autoplay
-  auto-rotate
-  environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr">
-</model-viewer>
+  <model-viewer
+    id="viewer"
+    src="african_penguin_spheniscus_demersus_low_poly.glb"
+    alt="3D Model"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    camera-controls
+    autoplay
+    auto-rotate
+    environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr">
+  </model-viewer>
 
   <div id="controls">
     <div class="buttons">
@@ -180,12 +194,24 @@ input[type=range]::-moz-range-thumb {
     <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
   </div>
 
+  <div id="extraInteractive">
+    <label for="lightingSelect">Lighting Environment:</label>
+    <select id="lightingSelect">
+      <option value="https://modelviewer.dev/shared-assets/environments/neutral.hdr" selected>Neutral</option>
+      <option value="https://modelviewer.dev/shared-assets/environments/moonless_golf_1k.hdr">Moonless Golf</option>
+      <option value="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k.hdr">Spruit Sunrise</option>
+      <option value="https://modelviewer.dev/shared-assets/environments/country_sunset_1k.hdr">Country Sunset</option>
+      <option value="https://modelviewer.dev/shared-assets/environments/venice_sunset_1k.hdr">Venice Sunset</option>
+    </select>
+  </div>
+
   <script>
     const viewer = document.querySelector('#viewer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const slider = document.getElementById('slider');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
+    const lightingSelect = document.getElementById('lightingSelect');
 
     let userSliding = false;
     let isPlaying = true;
@@ -258,9 +284,12 @@ input[type=range]::-moz-range-thumb {
       playPauseBtn.textContent = 'Pause';
     });
 
+    lightingSelect.addEventListener('change', () => {
+      viewer.environmentImage = lightingSelect.value;
+    });
+
     syncSlider();
   </script>
 
 </body>
 </html>
-
