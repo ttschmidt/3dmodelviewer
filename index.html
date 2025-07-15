@@ -70,78 +70,72 @@
       }
     }
     /* Make slider purple */
-/* Base slider style */
-input[type="range"] {
-  -webkit-appearance: none;
+/* Slider container size adjustments (keep from your existing CSS) */
+#slider {
   width: 90%;
   max-width: 800px;
-  height: 10px;
-  background: transparent;
-  cursor: pointer;
-  margin-top: 10px;
   border-radius: 5px;
+  /* no white border here */
 }
 
-/* WebKit */
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 10px;
-  background: #442C64;      /* exact purple */
-  border: 2px solid white;  /* pure white border */
-  border-radius: 5px;
-}
-
-input[type="range"]::-webkit-slider-thumb {
+/* Cross-browser styling */
+input[type=range] {
   -webkit-appearance: none;
-  height: 24px;
-  width: 24px;
-  background: white;
-  border: 2px solid #442C64;
-  border-radius: 50%;
-  margin-top: -8px; /* center the thumb vertically */
-  box-shadow: 0 0 10px #442C64;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  background: transparent;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 15px #442C64;
-  transform: scale(1.1);
-}
-
-/* Firefox */
-input[type="range"]::-moz-range-track {
-  height: 10px;
-  background: #442C64;
-  border: 2px solid white;
+/* Track */
+input[type=range]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: #482c64;
   border-radius: 5px;
+  box-shadow: 0 0 8px #482c64;
 }
 
-input[type="range"]::-moz-range-thumb {
-  height: 24px;
-  width: 24px;
+input[type=range]::-moz-range-track {
+  height: 8px;
+  background: #482c64;
+  border-radius: 5px;
+  box-shadow: 0 0 8px #482c64;
+}
+
+/* Thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
   background: white;
-  border: 2px solid #442C64;
   border-radius: 50%;
-  box-shadow: 0 0 10px #442C64;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  margin-top: -6px;
+  cursor: pointer;
+  box-shadow: 0 0 6px #482c64;
+  /* no border */
 }
 
-input[type="range"]::-moz-range-thumb:hover {
-  box-shadow: 0 0 15px #442C64;
-  transform: scale(1.1);
+input[type=range]::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 6px #482c64;
+  /* no border */
 }
 
-/* Mobile tweaks */
-@media (max-width: 600px) {
-  input[type="range"]::-webkit-slider-runnable-track,
-  input[type="range"]::-moz-range-track {
-    height: 16px;
-    border-width: 3px;
+/* Bigger slider on mobile */
+@media (max-width: 1000px) {
+  input[type=range]::-webkit-slider-thumb {
+    height: 28px;
+    width: 28px;
+    margin-top: -10px;
   }
-  input[type="range"]::-webkit-slider-thumb,
-  input[type="range"]::-moz-range-thumb {
-    height: 32px;
-    width: 32px;
-    margin-top: -12px; /* keep it centered */
+  input[type=range]::-moz-range-thumb {
+    height: 28px;
+    width: 28px;
+  }
+  #slider {
+    width: 100%;
   }
 }
 
