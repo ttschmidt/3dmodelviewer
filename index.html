@@ -2,26 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>BoneView – Interactive Models</title>
+  <title>BoneView – Interactive Model</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
+      margin: 0; padding: 0; height: 100%; width: 100%; background: #000;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     }
 
     model-viewer {
-      width: 100vw;
-      height: 75vh;
+      width: 100%;
+      max-width: 900px;
+      height: 85vh;
       background-color: #000;
-      object-fit: contain;
     }
 
     #controls {
@@ -30,7 +23,7 @@
       padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
     }
 
@@ -42,48 +35,27 @@
     }
 
     button, select {
-      font-size: 1.4rem;
-      padding: 14px 20px;
-      border-radius: 8px;
+      font-size: 1.2rem;
+      padding: 10px 16px;
+      border-radius: 6px;
       border: none;
       background-color: #222;
       color: white;
       cursor: pointer;
     }
 
-    button:active, select:active {
-      background-color: #444;
-    }
-
     #slider {
       width: 90%;
       max-width: 800px;
     }
-
-    @media (max-width: 600px) {
-      button, select {
-        font-size: 2.6rem;
-        padding: 24px 32px;
-        min-width: 200px;
-      }
-
-      .buttons {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 20px;
-      }
-
-      #slider {
-        width: 100%;
-      }
-
-      model-viewer {
-        height: 70vh;
-      }
-    }
   </style>
 </head>
 <body>
+
+  <select id="modelSelect">
+    <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
+    <option value="rabbit.glb">Rabbit</option>
+  </select>
 
   <model-viewer
     id="viewer"
@@ -99,13 +71,10 @@
 
   <div id="controls">
     <div class="buttons">
-      <button id="playPauseBtn">Pause</button>
+      <button id="playBtn">Play</button>
+      <button id="pauseBtn">Pause</button>
+      <button id="arBtn">AR</button>
     </div>
-
-    <select id="modelSelect">
-      <option value="penguin.glb">African Penguin</option>
-      <option value="rabbit_rigged.glb">Rabbit Rigged</option>
-    </select>
 
     <select id="animationSelect">
       <option disabled selected>-- Select Animation --</option>
@@ -115,17 +84,17 @@
   </div>
 
   <script>
-    const viewer = document.getElementById('viewer');
-    const playPauseBtn = document.getElementById('playPauseBtn');
+    const viewer = document.querySelector('#viewer');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
     const arBtn = document.getElementById('arBtn');
     const slider = document.getElementById('slider');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
 
     let userSliding = false;
-    let isPlaying = true;
 
-    function loadAnimations() {
+    const loadAnimations = () => {
       const animations = viewer.availableAnimations || [];
       animationSelect.innerHTML = '';
       if (animations.length > 0) {
@@ -137,48 +106,22 @@
         });
         viewer.animationName = animations[0];
         animationSelect.value = animations[0];
-      } else {
-        const option = document.createElement('option');
-        option.textContent = 'No animations';
-        option.disabled = true;
-        animationSelect.appendChild(option);
       }
-    }
+    };
+
+    const syncSlider = () => {
+      if (!userSliding && viewer.duration > 0) {
+        slider.value = viewer.currentTime / viewer.duration;
+      }
+      requestAnimationFrame(syncSlider);
+    };
 
     viewer.addEventListener('load', () => {
       loadAnimations();
-
-      const updateSlider = () => {
-        if (!userSliding && viewer.duration > 0) {
-          slider.value = viewer.currentTime / viewer.duration;
-        }
-        requestAnimationFrame(updateSlider);
-      };
-      updateSlider();
     });
 
-    modelSelect.addEventListener('change', () => {
-      viewer.src = modelSelect.value;
-    });
-
-    animationSelect.addEventListener('change', () => {
-      viewer.animationName = animationSelect.value;
-      viewer.play();
-      isPlaying = true;
-      playPauseBtn.textContent = 'Pause';
-    });
-
-    playPauseBtn.addEventListener('click', () => {
-      if (isPlaying) {
-        viewer.pause();
-        playPauseBtn.textContent = 'Play';
-      } else {
-        viewer.play();
-        playPauseBtn.textContent = 'Pause';
-      }
-      isPlaying = !isPlaying;
-    });
-
+    playBtn.addEventListener('click', () => viewer.play());
+    pauseBtn.addEventListener('click', () => viewer.pause());
     arBtn.addEventListener('click', () => viewer.activateAR());
 
     slider.addEventListener('input', () => {
@@ -187,10 +130,22 @@
         viewer.currentTime = slider.value * viewer.duration;
       }
     });
-
     slider.addEventListener('change', () => {
       userSliding = false;
     });
+
+    animationSelect.addEventListener('change', () => {
+      viewer.animationName = animationSelect.value;
+      viewer.play();
+    });
+
+    modelSelect.addEventListener('change', () => {
+      viewer.src = modelSelect.value;
+      viewer.poster = ''; // clears old thumbnail if any
+      viewer.play();
+    });
+
+    syncSlider();
   </script>
 
 </body>
