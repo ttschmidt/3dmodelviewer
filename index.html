@@ -71,32 +71,33 @@
     }
     /* Make slider purple */
 /* Base slider style */
-/* Base slider style */
 input[type="range"] {
   -webkit-appearance: none;
   width: 90%;
   max-width: 800px;
-  height: 8px;
+  height: 10px;
   background: transparent;
   cursor: pointer;
   margin-top: 10px;
+  border-radius: 5px;
 }
 
-/* WebKit (Chrome, Safari) */
+/* WebKit */
 input[type="range"]::-webkit-slider-runnable-track {
-  height: 8px;
-  background: #442C64;
-  border-radius: 4px;
+  height: 10px;
+  background: #442C64;      /* exact purple */
+  border: 2px solid white;  /* pure white border */
+  border-radius: 5px;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  height: 22px;
-  width: 22px;
+  height: 24px;
+  width: 24px;
   background: white;
   border: 2px solid #442C64;
   border-radius: 50%;
-  margin-top: -7px; /* Centers the thumb */
+  margin-top: -8px; /* center the thumb vertically */
   box-shadow: 0 0 10px #442C64;
   transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
@@ -108,14 +109,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 /* Firefox */
 input[type="range"]::-moz-range-track {
-  height: 8px;
+  height: 10px;
   background: #442C64;
-  border-radius: 4px;
+  border: 2px solid white;
+  border-radius: 5px;
 }
 
 input[type="range"]::-moz-range-thumb {
-  height: 22px;
-  width: 22px;
+  height: 24px;
+  width: 24px;
   background: white;
   border: 2px solid #442C64;
   border-radius: 50%;
@@ -127,6 +129,22 @@ input[type="range"]::-moz-range-thumb:hover {
   box-shadow: 0 0 15px #442C64;
   transform: scale(1.1);
 }
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  input[type="range"]::-webkit-slider-runnable-track,
+  input[type="range"]::-moz-range-track {
+    height: 16px;
+    border-width: 3px;
+  }
+  input[type="range"]::-webkit-slider-thumb,
+  input[type="range"]::-moz-range-thumb {
+    height: 32px;
+    width: 32px;
+    margin-top: -12px; /* keep it centered */
+  }
+}
+
 
   </style>
 </head>
