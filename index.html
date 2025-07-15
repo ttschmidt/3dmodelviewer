@@ -2,19 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>BoneView – Interactive Model</title>
+  <title>BoneView – Interactive Models</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%; background: #000;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     model-viewer {
       width: 100%;
       max-width: 900px;
-      height: 85vh;
+      aspect-ratio: 16 / 9;
       background-color: #000;
+      object-fit: contain;
     }
 
     #controls {
@@ -29,8 +36,8 @@
 
     .buttons {
       display: flex;
-      gap: 15px;
       flex-wrap: wrap;
+      gap: 15px;
       justify-content: center;
     }
 
@@ -44,22 +51,38 @@
       cursor: pointer;
     }
 
+    button:active, select:active {
+      background-color: #444;
+    }
+
     #slider {
       width: 90%;
       max-width: 800px;
+    }
+
+    @media (max-width: 600px) {
+      button, select {
+        font-size: 1rem;
+        padding: 14px 18px;
+        min-width: 120px;
+      }
+
+      .buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      #slider {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
 
-  <select id="modelSelect">
-    <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
-    <option value="rabbit_rigged.glb">Rabbit</option>
-  </select>
-
   <model-viewer
     id="viewer"
-    src="african_penguin_spheniscus_demersus_low_poly.glb"
+    src="penguin.glb"
     alt="3D Model"
     ar
     ar-modes="webxr scene-viewer quick-look"
@@ -76,6 +99,11 @@
       <button id="arBtn">AR</button>
     </div>
 
+    <select id="modelSelect">
+      <option value="penguin.glb">African Penguin</option>
+      <option value="rabbit.glb">Rabbit Rigged</option>
+    </select>
+
     <select id="animationSelect">
       <option disabled selected>-- Select Animation --</option>
     </select>
@@ -84,7 +112,7 @@
   </div>
 
   <script>
-    const viewer = document.querySelector('#viewer');
+    const viewer = document.getElementById('viewer');
     const playBtn = document.getElementById('playBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const arBtn = document.getElementById('arBtn');
@@ -94,7 +122,7 @@
 
     let userSliding = false;
 
-    const loadAnimations = () => {
+    function loadAnimations() {
       const animations = viewer.availableAnimations || [];
       animationSelect.innerHTML = '';
       if (animations.length > 0) {
@@ -106,18 +134,33 @@
         });
         viewer.animationName = animations[0];
         animationSelect.value = animations[0];
+      } else {
+        const option = document.createElement('option');
+        option.textContent = 'No animations';
+        option.disabled = true;
+        animationSelect.appendChild(option);
       }
-    };
-
-    const syncSlider = () => {
-      if (!userSliding && viewer.duration > 0) {
-        slider.value = viewer.currentTime / viewer.duration;
-      }
-      requestAnimationFrame(syncSlider);
-    };
+    }
 
     viewer.addEventListener('load', () => {
       loadAnimations();
+
+      const updateSlider = () => {
+        if (!userSliding && viewer.duration > 0) {
+          slider.value = viewer.currentTime / viewer.duration;
+        }
+        requestAnimationFrame(updateSlider);
+      };
+      updateSlider();
+    });
+
+    modelSelect.addEventListener('change', () => {
+      viewer.src = modelSelect.value;
+    });
+
+    animationSelect.addEventListener('change', () => {
+      viewer.animationName = animationSelect.value;
+      viewer.play();
     });
 
     playBtn.addEventListener('click', () => viewer.play());
@@ -130,22 +173,10 @@
         viewer.currentTime = slider.value * viewer.duration;
       }
     });
+
     slider.addEventListener('change', () => {
       userSliding = false;
     });
-
-    animationSelect.addEventListener('change', () => {
-      viewer.animationName = animationSelect.value;
-      viewer.play();
-    });
-
-    modelSelect.addEventListener('change', () => {
-      viewer.src = modelSelect.value;
-      viewer.poster = ''; // clears old thumbnail if any
-      viewer.play();
-    });
-
-    syncSlider();
   </script>
 
 </body>
