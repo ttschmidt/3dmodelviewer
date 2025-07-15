@@ -14,12 +14,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow: hidden;
     }
 
     model-viewer {
-      width: 100%;
-      max-width: 900px;
-      aspect-ratio: 16 / 9;
+      width: 100vw;
+      height: 75vh;
       background-color: #000;
       object-fit: contain;
     }
@@ -30,21 +30,21 @@
       padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       align-items: center;
     }
 
     .buttons {
       display: flex;
-      flex-wrap: wrap;
       gap: 15px;
+      flex-wrap: wrap;
       justify-content: center;
     }
 
     button, select {
-      font-size: 1.2rem;
-      padding: 10px 16px;
-      border-radius: 6px;
+      font-size: 1.4rem;
+      padding: 14px 20px;
+      border-radius: 8px;
       border: none;
       background-color: #222;
       color: white;
@@ -62,18 +62,23 @@
 
     @media (max-width: 600px) {
       button, select {
-        font-size: 1rem;
-        padding: 14px 18px;
-        min-width: 120px;
+        font-size: 1.6rem;
+        padding: 16px 24px;
+        min-width: 160px;
       }
 
       .buttons {
         flex-direction: column;
         align-items: stretch;
+        gap: 20px;
       }
 
       #slider {
         width: 100%;
+      }
+
+      model-viewer {
+        height: 70vh;
       }
     }
   </style>
@@ -94,14 +99,13 @@
 
   <div id="controls">
     <div class="buttons">
-      <button id="playBtn">Play</button>
-      <button id="pauseBtn">Pause</button>
+      <button id="playPauseBtn">Pause</button>
       <button id="arBtn">AR</button>
     </div>
 
     <select id="modelSelect">
       <option value="penguin.glb">African Penguin</option>
-      <option value="rabbit.glb">Rabbit Rigged</option>
+      <option value="rabbit_rigged.glb">Rabbit Rigged</option>
     </select>
 
     <select id="animationSelect">
@@ -113,14 +117,14 @@
 
   <script>
     const viewer = document.getElementById('viewer');
-    const playBtn = document.getElementById('playBtn');
-    const pauseBtn = document.getElementById('pauseBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
     const arBtn = document.getElementById('arBtn');
     const slider = document.getElementById('slider');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
 
     let userSliding = false;
+    let isPlaying = true;
 
     function loadAnimations() {
       const animations = viewer.availableAnimations || [];
@@ -161,10 +165,21 @@
     animationSelect.addEventListener('change', () => {
       viewer.animationName = animationSelect.value;
       viewer.play();
+      isPlaying = true;
+      playPauseBtn.textContent = 'Pause';
     });
 
-    playBtn.addEventListener('click', () => viewer.play());
-    pauseBtn.addEventListener('click', () => viewer.pause());
+    playPauseBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        viewer.pause();
+        playPauseBtn.textContent = 'Play';
+      } else {
+        viewer.play();
+        playPauseBtn.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+
     arBtn.addEventListener('click', () => viewer.activateAR());
 
     slider.addEventListener('input', () => {
