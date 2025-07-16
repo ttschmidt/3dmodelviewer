@@ -61,8 +61,7 @@
 
     #speedLabel {
       color: white;
-      font-size: 1rem;
-      margin-top: 8px;
+      font-size: 1.1rem;
     }
 
     @media (max-width: 1000px) {
@@ -78,6 +77,7 @@
 
       #slider, #speedSlider {
         width: 100%;
+        margin-top: 25px;
       }
     }
 
@@ -132,15 +132,49 @@
         width: 48px;
       }
     }
+
+    #controlContainer {
+      transition: opacity 0.3s ease;
+    }
+
+    #controlContainer.hidden {
+      opacity: 0;
+      pointer-events: none;
+      height: 0;
+      overflow: hidden;
+    }
+
+    #toggleControlsBtn {
+      margin: 15px;
+    }
   </style>
 </head>
 <body>
 
-  <select id="modelSelect">
-    <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
-    <option value="rabbit_rigged.glb">Rabbit</option>
-    <option value="elephant.glb">Elephant</option>
-  </select>
+  <button id="toggleControlsBtn">Hide Controls</button>
+
+  <div id="controlContainer">
+    <select id="modelSelect">
+      <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
+      <option value="rabbit_rigged.glb">Rabbit</option>
+      <option value="elephant.glb">Elephant</option>
+    </select>
+
+    <div id="controls">
+      <div class="buttons">
+        <button id="playPauseBtn">Pause</button>
+      </div>
+
+      <select id="animationSelect">
+        <option disabled selected>-- Select Animation --</option>
+      </select>
+
+      <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
+
+      <label id="speedLabel">Playback Speed: 1.00×</label>
+      <input type="range" id="speedSlider" min="0.25" max="3" step="0.01" value="1" />
+    </div>
+  </div>
 
   <model-viewer
     id="viewer"
@@ -154,119 +188,101 @@
     environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr">
   </model-viewer>
 
-  <div id="controls">
-    <div class="buttons">
-      <button id="playPauseBtn">Pause</button>
-    </div>
+  <script>
+    const viewer = document.querySelector('#viewer');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const slider = document.getElementById('slider');
+    const modelSelect = document.getElementById('modelSelect');
+    const animationSelect = document.getElementById('animationSelect');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedLabel = document.getElementById('speedLabel');
+    const toggleBtn = document.getElementById('toggleControlsBtn');
+    const controlContainer = document.getElementById('controlContainer');
 
-    <select id="animationSelect">
-      <option disabled selected>-- Select Animation --</option>
-    </select>
+    let userSliding = false;
+    let isPlaying = true;
 
-    <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
-
-    <!-- Playback Speed -->
-    <label id="speedLabel" for="speedSlider">Playback Speed: 1.00×</label>
-    <input type="range" id="speedSlider" min="0.25" max="3" step="0.01" value="1" />
-  </div>
-
-<script>
-  const viewer = document.querySelector('#viewer');
-  const playPauseBtn = document.getElementById('playPauseBtn');
-  const slider = document.getElementById('slider');
-  const speedSlider = document.getElementById('speedSlider');
-  const speedLabel = document.getElementById('speedLabel');
-  const modelSelect = document.getElementById('modelSelect');
-  const animationSelect = document.getElementById('animationSelect');
-
-  let userSliding = false;
-  let isPlaying = true;
-  let speed = parseFloat(speedSlider.value);
-
-  const loadAnimations = () => {
-    const animations = viewer.availableAnimations || [];
-    animationSelect.innerHTML = '';
-
-    if (animations.length > 0) {
-      animations.forEach(name => {
+    const loadAnimations = () => {
+      const animations = viewer.availableAnimations || [];
+      animationSelect.innerHTML = '';
+      if (animations.length > 0) {
+        animations.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          animationSelect.appendChild(option);
+        });
+        viewer.animationName = animations[0];
+        animationSelect.value = animations[0];
+      } else {
         const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
+        option.textContent = 'No animations';
+        option.disabled = true;
         animationSelect.appendChild(option);
-      });
-      viewer.animationName = animations[0];
-      animationSelect.value = animations[0];
-      viewer.timeScale = speed;
-    } else {
-      const option = document.createElement('option');
-      option.textContent = 'No animations';
-      option.disabled = true;
-      animationSelect.appendChild(option);
-    }
-  };
+      }
+    };
 
-  const syncSlider = () => {
-    if (!userSliding && viewer.duration > 0 && isPlaying) {
-      slider.value = viewer.currentTime / viewer.duration;
-    }
-    requestAnimationFrame(syncSlider);
-  };
+    const syncSlider = () => {
+      if (!userSliding && viewer.duration > 0) {
+        slider.value = viewer.currentTime / viewer.duration;
+      }
+      requestAnimationFrame(syncSlider);
+    };
 
-  viewer.addEventListener('load', () => {
-    loadAnimations();
-    viewer.timeScale = speed;
-  });
+    viewer.addEventListener('load', () => {
+      loadAnimations();
+    });
 
-  playPauseBtn.addEventListener('click', () => {
-    isPlaying = !isPlaying;
-    if (isPlaying) {
+    playPauseBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        viewer.pause();
+        playPauseBtn.textContent = 'Play';
+      } else {
+        viewer.play();
+        playPauseBtn.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    slider.addEventListener('input', () => {
+      userSliding = true;
+      if (viewer.duration > 0) {
+        viewer.currentTime = slider.value * viewer.duration;
+      }
+    });
+
+    slider.addEventListener('change', () => {
+      userSliding = false;
+    });
+
+    animationSelect.addEventListener('change', () => {
+      viewer.animationName = animationSelect.value;
       viewer.play();
+      isPlaying = true;
       playPauseBtn.textContent = 'Pause';
-    } else {
-      viewer.pause();
-      playPauseBtn.textContent = 'Play';
-    }
-  });
+    });
 
-  slider.addEventListener('input', () => {
-    userSliding = true;
-    if (viewer.duration > 0) {
-      viewer.pause();
-      const time = slider.value * viewer.duration;
-      viewer.currentTime = time;
-    }
-  });
-
-  slider.addEventListener('change', () => {
-    userSliding = false;
-    if (isPlaying) {
+    modelSelect.addEventListener('change', () => {
+      viewer.src = modelSelect.value;
+      viewer.poster = '';
       viewer.play();
-    }
-  });
+      isPlaying = true;
+      playPauseBtn.textContent = 'Pause';
+    });
 
-  speedSlider.addEventListener('input', () => {
-    speed = parseFloat(speedSlider.value);
-    speedLabel.textContent = `Playback Speed: ${speed.toFixed(2)}×`;
-    viewer.timeScale = speed;
-  });
+    speedSlider.addEventListener('input', () => {
+      const speed = parseFloat(speedSlider.value);
+      viewer.animationPlaybackRate = speed;
+      speedLabel.textContent = `Playback Speed: ${speed.toFixed(2)}×`;
+    });
 
-  animationSelect.addEventListener('change', () => {
-    viewer.animationName = animationSelect.value;
-    viewer.timeScale = speed;
-    if (isPlaying) viewer.play();
-  });
+    toggleBtn.addEventListener('click', () => {
+      const hidden = controlContainer.classList.toggle('hidden');
+      toggleBtn.textContent = hidden ? 'Show Controls' : 'Hide Controls';
+    });
 
-  modelSelect.addEventListener('change', () => {
-    viewer.src = modelSelect.value;
-    viewer.poster = '';
-    viewer.play();
-    isPlaying = true;
-    playPauseBtn.textContent = 'Pause';
-  });
-
-  syncSlider();
-</script>
-
+    syncSlider();
+  </script>
 
 </body>
 </html>
