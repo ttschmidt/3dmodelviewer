@@ -54,9 +54,15 @@
       background-color: #444;
     }
 
-    #slider {
+    #slider, #speedSlider {
       width: 90%;
       max-width: 800px;
+    }
+
+    #speedLabel {
+      color: white;
+      font-size: 1rem;
+      margin-top: 8px;
     }
 
     @media (max-width: 1000px) {
@@ -70,13 +76,11 @@
         min-width: 180px;
       }
 
-      #slider {
+      #slider, #speedSlider {
         width: 100%;
-        margin-top: 25px;
       }
     }
 
-    /* Slider Styling */
     input[type=range] {
       -webkit-appearance: none;
       width: 100%;
@@ -122,6 +126,7 @@
         width: 38px;
         margin-top: -10px;
       }
+
       input[type=range]::-moz-range-thumb {
         height: 48px;
         width: 48px;
@@ -160,23 +165,19 @@
 
     <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
 
-    <!-- Playback Speed Selector -->
-    <select id="speedSelect">
-      <option value="0.25">0.25× Speed</option>
-      <option value="0.5">0.5× Speed</option>
-      <option value="1" selected>1× Speed</option>
-      <option value="1.5">1.5× Speed</option>
-      <option value="2">2× Speed</option>
-    </select>
+    <!-- Playback Speed -->
+    <label id="speedLabel" for="speedSlider">Playback Speed: 1.00×</label>
+    <input type="range" id="speedSlider" min="0.25" max="3" step="0.01" value="1" />
   </div>
 
   <script>
     const viewer = document.querySelector('#viewer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const slider = document.getElementById('slider');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedLabel = document.getElementById('speedLabel');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
-    const speedSelect = document.getElementById('speedSelect');
 
     let userSliding = false;
     let isPlaying = true;
@@ -208,9 +209,7 @@
       requestAnimationFrame(syncSlider);
     };
 
-    viewer.addEventListener('load', () => {
-      loadAnimations();
-    });
+    viewer.addEventListener('load', loadAnimations);
 
     playPauseBtn.addEventListener('click', () => {
       if (isPlaying) {
@@ -249,8 +248,10 @@
       playPauseBtn.textContent = 'Pause';
     });
 
-    speedSelect.addEventListener('change', () => {
-      viewer.timeScale = parseFloat(speedSelect.value);
+    speedSlider.addEventListener('input', () => {
+      const speed = parseFloat(speedSlider.value);
+      viewer.timeScale = speed;
+      speedLabel.textContent = `Playback Speed: ${speed.toFixed(2)}×`;
     });
 
     syncSlider();
