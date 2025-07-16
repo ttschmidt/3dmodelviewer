@@ -18,7 +18,6 @@
       object-fit: contain;
     }
 
-
     #controls {
       width: 100%;
       max-width: 900px;
@@ -46,106 +45,88 @@
       cursor: pointer;
     }
 
-  #modelSelect {
-    margin-top: 25px;   /* existing spacing from top */
-    margin-bottom: 25px; /* new spacing below */
+    #modelSelect {
+      margin-top: 25px;
+      margin-bottom: 25px;
     }
 
     button:active, select:active {
       background-color: #444;
-      
     }
 
     #slider {
       width: 90%;
       max-width: 800px;
     }
+
     @media (max-width: 1000px) {
       model-viewer {
         height: 1600px;
       }
-    
+
       button, select {
         font-size: 2rem;
         padding: 20px 28px;
         min-width: 180px;
       }
-    
+
       #slider {
         width: 100%;
         margin-top: 25px;
       }
     }
-    /* Make slider purple */
-/* Slider container size adjustments (keep from your existing CSS) */
-#slider {
-  width: 90%;
-  max-width: 800px;
-  border-radius: 5px;
-  /* no white border here */
-}
 
-/* Cross-browser styling */
-input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  background: transparent;
-}
+    /* Slider Styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
 
-/* Track */
-input[type=range]::-webkit-slider-runnable-track {
-  height: 8px;
-  background: #9251ff;
-  border-radius: 5px;
-}
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 8px;
+      background: #9251ff;
+      border-radius: 5px;
+    }
 
-input[type=range]::-moz-range-track {
-  height: 8px;
-  background: #6c009d;
-  border-radius: 5px;
-  box-shadow: 0 0 8px #6c009d;
-}
+    input[type=range]::-moz-range-track {
+      height: 8px;
+      background: #6c009d;
+      border-radius: 5px;
+      box-shadow: 0 0 8px #6c009d;
+    }
 
-/* Thumb */
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 20px;
-  width: 20px;
-  background: white;
-  border-radius: 50%;
-  margin-top: -6px;
-  cursor: pointer;
-  box-shadow: 0 0 6px #6c009d;
-  /* no border */
-}
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      background: white;
+      border-radius: 50%;
+      margin-top: -6px;
+      cursor: pointer;
+      box-shadow: 0 0 6px #6c009d;
+    }
 
-input[type=range]::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 6px #6c009d;
-  /* no border */
-}
+    input[type=range]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 6px #6c009d;
+    }
 
-/* Bigger slider on mobile */
-@media (max-width: 1000px) {
-  input[type=range]::-webkit-slider-thumb {
-    height: 38px;
-    width: 38px;
-    margin-top: -10px;
-  }
-  input[type=range]::-moz-range-thumb {
-    height: 48px;
-    width: 48px;
-  }
-  #slider {
-    width: 100%;
-  }
-}
-
-
+    @media (max-width: 1000px) {
+      input[type=range]::-webkit-slider-thumb {
+        height: 38px;
+        width: 38px;
+        margin-top: -10px;
+      }
+      input[type=range]::-moz-range-thumb {
+        height: 48px;
+        width: 48px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -153,20 +134,20 @@ input[type=range]::-moz-range-thumb {
   <select id="modelSelect">
     <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
     <option value="rabbit_rigged.glb">Rabbit</option>
-     <option value="elephant.glb">Elephant</option>
+    <option value="elephant.glb">Elephant</option>
   </select>
 
-<model-viewer
-  id="viewer"
-  src="african_penguin_spheniscus_demersus_low_poly.glb"
-  alt="3D Model"
-  ar
-  ar-modes="webxr scene-viewer quick-look"
-  camera-controls
-  autoplay
-  auto-rotate
-  environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr">
-</model-viewer>
+  <model-viewer
+    id="viewer"
+    src="african_penguin_spheniscus_demersus_low_poly.glb"
+    alt="3D Model"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    camera-controls
+    autoplay
+    auto-rotate
+    environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr">
+  </model-viewer>
 
   <div id="controls">
     <div class="buttons">
@@ -178,6 +159,15 @@ input[type=range]::-moz-range-thumb {
     </select>
 
     <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
+
+    <!-- Playback Speed Selector -->
+    <select id="speedSelect">
+      <option value="0.25">0.25× Speed</option>
+      <option value="0.5">0.5× Speed</option>
+      <option value="1" selected>1× Speed</option>
+      <option value="1.5">1.5× Speed</option>
+      <option value="2">2× Speed</option>
+    </select>
   </div>
 
   <script>
@@ -186,6 +176,7 @@ input[type=range]::-moz-range-thumb {
     const slider = document.getElementById('slider');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
+    const speedSelect = document.getElementById('speedSelect');
 
     let userSliding = false;
     let isPlaying = true;
@@ -252,10 +243,14 @@ input[type=range]::-moz-range-thumb {
 
     modelSelect.addEventListener('change', () => {
       viewer.src = modelSelect.value;
-      viewer.poster = ''; // clear any old poster
+      viewer.poster = '';
       viewer.play();
       isPlaying = true;
       playPauseBtn.textContent = 'Pause';
+    });
+
+    speedSelect.addEventListener('change', () => {
+      viewer.timeScale = parseFloat(speedSelect.value);
     });
 
     syncSlider();
@@ -263,3 +258,4 @@ input[type=range]::-moz-range-thumb {
 
 </body>
 </html>
+
