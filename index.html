@@ -6,26 +6,31 @@
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%; width: 100%; background: #000;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
     }
 
     model-viewer {
+      flex: 1;
       width: 100%;
-      height: 75vh;
-      max-height: 800px;
       background-color: #000;
       object-fit: contain;
     }
 
-    #controls {
+    #controlContainer {
+      background: #111;
       width: 100%;
-      max-width: 900px;
-      padding: 10px;
+      padding: 10px 0;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.5);
       display: flex;
       flex-direction: column;
-      gap: 10px;
       align-items: center;
+      gap: 12px;
     }
 
     .buttons {
@@ -45,11 +50,6 @@
       cursor: pointer;
     }
 
-    #modelSelect {
-      margin-top: 25px;
-      margin-bottom: 25px;
-    }
-
     button:active, select:active {
       background-color: #444;
     }
@@ -59,32 +59,14 @@
       max-width: 800px;
     }
 
-    #speedLabel {
-      color: white;
-      font-size: 1.1rem;
-    }
-
-    @media (max-width: 1000px) {
-      model-viewer {
-        height: 1600px;
-      }
-
-      button, select {
-        font-size: 2rem;
-        padding: 20px 28px;
-        min-width: 180px;
-      }
-
-      #slider, #speedSlider {
-        width: 100%;
-        margin-top: 25px;
-      }
+    #modelSelect {
+      margin: 10px 0;
     }
 
     input[type=range] {
       -webkit-appearance: none;
-      width: 100%;
       background: transparent;
+      width: 100%;
     }
 
     input[type=range]::-webkit-slider-runnable-track {
@@ -121,6 +103,12 @@
     }
 
     @media (max-width: 1000px) {
+      button, select {
+        font-size: 2rem;
+        padding: 20px 28px;
+        min-width: 180px;
+      }
+
       input[type=range]::-webkit-slider-thumb {
         height: 38px;
         width: 38px;
@@ -128,53 +116,13 @@
       }
 
       input[type=range]::-moz-range-thumb {
-        height: 48px;
-        width: 48px;
+        height: 38px;
+        width: 38px;
       }
-    }
-
-    #controlContainer {
-      transition: opacity 0.3s ease;
-    }
-
-    #controlContainer.hidden {
-      opacity: 0;
-      pointer-events: none;
-      height: 0;
-      overflow: hidden;
-    }
-
-    #toggleControlsBtn {
-      margin: 15px;
     }
   </style>
 </head>
 <body>
-
-  <button id="toggleControlsBtn">Hide Controls</button>
-
-  <div id="controlContainer">
-    <select id="modelSelect">
-      <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
-      <option value="rabbit_rigged.glb">Rabbit</option>
-      <option value="elephant.glb">Elephant</option>
-    </select>
-
-    <div id="controls">
-      <div class="buttons">
-        <button id="playPauseBtn">Pause</button>
-      </div>
-
-      <select id="animationSelect">
-        <option disabled selected>-- Select Animation --</option>
-      </select>
-
-      <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
-
-      <label id="speedLabel">Playback Speed: 1.00×</label>
-      <input type="range" id="speedSlider" min="0.25" max="3" step="0.01" value="1" />
-    </div>
-  </div>
 
   <model-viewer
     id="viewer"
@@ -188,16 +136,34 @@
     environment-image="https://modelviewer.dev/shared-assets/environments/neutral.hdr">
   </model-viewer>
 
+  <div id="controlContainer">
+    <select id="modelSelect">
+      <option value="african_penguin_spheniscus_demersus_low_poly.glb">Penguin</option>
+      <option value="rabbit_rigged.glb">Rabbit</option>
+      <option value="elephant.glb">Elephant</option>
+    </select>
+
+    <div class="buttons">
+      <button id="playPauseBtn">Pause</button>
+    </div>
+
+    <select id="animationSelect">
+      <option disabled selected>-- Select Animation --</option>
+    </select>
+
+    <input type="range" id="slider" min="0" max="1" step="0.001" value="0" />
+
+    <label style="color:white">Speed</label>
+    <input type="range" id="speedSlider" min="0.25" max="3" step="0.05" value="1" />
+  </div>
+
   <script>
     const viewer = document.querySelector('#viewer');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const slider = document.getElementById('slider');
+    const speedSlider = document.getElementById('speedSlider');
     const modelSelect = document.getElementById('modelSelect');
     const animationSelect = document.getElementById('animationSelect');
-    const speedSlider = document.getElementById('speedSlider');
-    const speedLabel = document.getElementById('speedLabel');
-    const toggleBtn = document.getElementById('toggleControlsBtn');
-    const controlContainer = document.getElementById('controlContainer');
 
     let userSliding = false;
     let isPlaying = true;
@@ -229,9 +195,7 @@
       requestAnimationFrame(syncSlider);
     };
 
-    viewer.addEventListener('load', () => {
-      loadAnimations();
-    });
+    viewer.addEventListener('load', loadAnimations);
 
     playPauseBtn.addEventListener('click', () => {
       if (isPlaying) {
@@ -255,6 +219,10 @@
       userSliding = false;
     });
 
+    speedSlider.addEventListener('input', () => {
+      viewer.timeScale = parseFloat(speedSlider.value);
+    });
+
     animationSelect.addEventListener('change', () => {
       viewer.animationName = animationSelect.value;
       viewer.play();
@@ -270,20 +238,8 @@
       playPauseBtn.textContent = 'Pause';
     });
 
-    speedSlider.addEventListener('input', () => {
-      const speed = parseFloat(speedSlider.value);
-      viewer.animationPlaybackRate = speed;
-      speedLabel.textContent = `Playback Speed: ${speed.toFixed(2)}×`;
-    });
-
-    toggleBtn.addEventListener('click', () => {
-      const hidden = controlContainer.classList.toggle('hidden');
-      toggleBtn.textContent = hidden ? 'Show Controls' : 'Hide Controls';
-    });
-
     syncSlider();
   </script>
 
 </body>
 </html>
-
